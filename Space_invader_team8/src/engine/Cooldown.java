@@ -69,4 +69,4 @@ public class Cooldown {
 							* (this.milliseconds + this.variance));
 	}
 }
-// test maj
+
