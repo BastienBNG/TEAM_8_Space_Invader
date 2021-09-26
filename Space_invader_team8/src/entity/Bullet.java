@@ -72,3 +72,7 @@ public class Bullet extends Entity {
 		return this.speed;
 	}
 }
+
+/*
+ *modif test
+ */
