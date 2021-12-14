@@ -16,25 +16,34 @@ public class GameSettings {
 	private int baseSpeed;
 	/** Frequency of enemy shootings, +/- 30%. */
 	private int shootingFrecuency;
+	/** Current level of the game. */
+	private int lvl;
+	private float musicVolume;
+	private float SoundVolume;
 
 	/**
 	 * Constructor.
 	 * 
-	 * @param formationWidth
-	 *            Width of the level's enemy formation.
-	 * @param formationHeight
-	 *            Height of the level's enemy formation.
-	 * @param baseSpeed
-	 *            Speed of the enemies.
-	 * @param shootingFrecuency
-	 *            Frecuency of enemy shootings, +/- 30%.
+	 *
+	 * @param lvl
+	 *           Each parameter of the level depends of the level itself.
 	 */
-	public GameSettings(final int formationWidth, final int formationHeight,
-			final int baseSpeed, final int shootingFrecuency) {
-		this.formationWidth = formationWidth;
-		this.formationHeight = formationHeight;
-		this.baseSpeed = baseSpeed;
-		this.shootingFrecuency = shootingFrecuency;
+	public GameSettings(final int lvl) {
+		if (lvl % 2 == 0) {
+			this.formationWidth = lvl + 1;
+			this.formationHeight = lvl + 1;
+			this.baseSpeed = 60 / lvl;
+			this.shootingFrecuency = 2520 / lvl;
+		}
+		else {
+			this.formationWidth = lvl;
+			this.formationHeight = lvl + 2;
+			this.baseSpeed = 60 / lvl;
+			this.shootingFrecuency = 2520 / lvl;
+		}
+		musicVolume = 0;
+		SoundVolume = 0;
+
 	}
 
 	/**
@@ -65,4 +74,19 @@ public class GameSettings {
 		return shootingFrecuency;
 	}
 
+	public float getMusicVolume() {
+		return musicVolume;
+	}
+
+	public void setMusicVolume(float musicVolume) {
+		this.musicVolume = musicVolume;
+	}
+
+	public float getSoundVolume() {
+		return SoundVolume;
+	}
+
+	public void setSoundVolume(float soundVolume) {
+		SoundVolume = soundVolume;
+	}
 }
