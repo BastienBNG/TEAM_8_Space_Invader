@@ -1,5 +1,5 @@
 package engine;
-
+import audio.AudioPlayer;
 import java.awt.Insets;
 
 import javax.swing.JFrame;
@@ -14,7 +14,7 @@ import screen.Screen;
  */
 @SuppressWarnings("serial")
 public class Frame extends JFrame {
-
+	protected AudioPlayer audioPlayer;
 	/** Frame width. */
 	private int width;
 	/** Frame height. */
@@ -44,6 +44,8 @@ public class Frame extends JFrame {
 		setTitle("Invaders");
 
 		addKeyListener(Core.getInputManager());
+		audioPlayer = new AudioPlayer();
+		audioPlayer.playSound("sw1.wav");
 	}
 
 	/**

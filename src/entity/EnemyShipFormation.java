@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.Random;
 
 import screen.Screen;
 import engine.Cooldown;
@@ -22,94 +23,182 @@ import engine.GameSettings;
  */
 public class EnemyShipFormation implements Iterable<EnemyShip> {
 
-	/** Initial position in the x-axis. */
+	/**
+	 * Initial position in the x-axis.
+	 */
 	private static final int INIT_POS_X = 20;
-	/** Initial position in the x-axis. */
+	/**
+	 * Initial position in the x-axis.
+	 */
 	private static final int INIT_POS_Y = 100;
-	/** Distance between ships. */
+	/**
+	 * Distance between ships.
+	 */
 	private static final int SEPARATION_DISTANCE = 40;
-	/** Proportion of C-type ships. */
+	/**
+	 * Proportion of C-type ships.
+	 */
 	private static final double PROPORTION_C = 0.2;
-	/** Proportion of B-type ships. */
+	/**
+	 * Proportion of B-type ships.
+	 */
 	private static final double PROPORTION_B = 0.4;
-	/** Lateral speed of the formation. */
+	/**
+	 * Lateral speed of the formation.
+	 */
 	private static final int X_SPEED = 8;
-	/** Downwards speed of the formation. */
+	/**
+	 * Downwards speed of the formation.
+	 */
 	private static final int Y_SPEED = 4;
-	/** Speed of the bullets shot by the members. */
+	/**
+	 * Speed of the bullets shot by the members.
+	 */
 	private static final int BULLET_SPEED = 4;
-	/** Proportion of differences between shooting times. */
+	/**
+	 * Proportion of differences between shooting times.
+	 */
 	private static final double SHOOTING_VARIANCE = .2;
-	/** Margin on the sides of the screen. */
+	/**
+	 * Margin on the sides of the screen.
+	 */
 	private static final int SIDE_MARGIN = 20;
-	/** Margin on the bottom of the screen. */
+	/**
+	 * Margin on the bottom of the screen.
+	 */
 	private static final int BOTTOM_MARGIN = 80;
-	/** Distance to go down each pass. */
+	/**
+	 * Distance to go down each pass.
+	 */
 	private static final int DESCENT_DISTANCE = 20;
-	/** Minimum speed allowed. */
+	/**
+	 * Minimum speed allowed.
+	 */
 	private static final int MINIMUM_SPEED = 10;
+	/**
+	 * Random number for various patern.
+	 */
+	Random rand;
+	/**
+	 * Double number for various patern.
+	 */
+	double val;
 
-	/** DrawManager instance. */
+
+	/**
+	 * DrawManager instance.
+	 */
 	private DrawManager drawManager;
-	/** Application logger. */
+	/**
+	 * Application logger.
+	 */
 	private Logger logger;
-	/** Screen to draw ships on. */
+	/**
+	 * Screen to draw ships on.
+	 */
 	private Screen screen;
 
-	/** List of enemy ships forming the formation. */
+	/**
+	 * List of enemy ships forming the formation.
+	 */
 	private List<List<EnemyShip>> enemyShips;
-	/** Minimum time between shots. */
+	/**
+	 * Minimum time between shots.
+	 */
 	private Cooldown shootingCooldown;
-	/** Number of ships in the formation - horizontally. */
+	/**
+	 * Number of ships in the formation - horizontally.
+	 */
 	private int nShipsWide;
-	/** Number of ships in the formation - vertically. */
+	/**
+	 * Number of ships in the formation - vertically.
+	 */
 	private int nShipsHigh;
-	/** Time between shots. */
+	/**
+	 * Time between shots.
+	 */
 	private int shootingInterval;
-	/** Variance in the time between shots. */
+	/**
+	 * Variance in the time between shots.
+	 */
 	private int shootingVariance;
-	/** Initial ship speed. */
+	/**
+	 * Initial ship speed.
+	 */
 	private int baseSpeed;
-	/** Speed of the ships. */
+	/**
+	 * Speed of the ships.
+	 */
 	private int movementSpeed;
-	/** Current direction the formation is moving on. */
+	/**
+	 * Current direction the formation is moving on.
+	 */
 	private Direction currentDirection;
-	/** Direction the formation was moving previously. */
+	/**
+	 * Direction the formation was moving previously.
+	 */
 	private Direction previousDirection;
-	/** Interval between movements, in frames. */
+	/**
+	 * Interval between movements, in frames.
+	 */
 	private int movementInterval;
-	/** Total width of the formation. */
+	/**
+	 * Total width of the formation.
+	 */
 	private int width;
-	/** Total height of the formation. */
+	/**
+	 * Total height of the formation.
+	 */
 	private int height;
-	/** Position in the x-axis of the upper left corner of the formation. */
+	/**
+	 * Position in the x-axis of the upper left corner of the formation.
+	 */
 	private int positionX;
-	/** Position in the y-axis of the upper left corner of the formation. */
+	/**
+	 * Position in the y-axis of the upper left corner of the formation.
+	 */
 	private int positionY;
-	/** Width of one ship. */
+	/**
+	 * Width of one ship.
+	 */
 	private int shipWidth;
-	/** Height of one ship. */
+	/**
+	 * Height of one ship.
+	 */
 	private int shipHeight;
-	/** List of ships that are able to shoot. */
+	/**
+	 * List of ships that are able to shoot.
+	 */
 	private List<EnemyShip> shooters;
-	/** Number of not destroyed ships. */
+	/**
+	 * Number of not destroyed ships.
+	 */
 	private int shipCount;
 
-	/** Directions the formation can move. */
+	/**
+	 * Directions the formation can move.
+	 */
 	private enum Direction {
-		/** Movement to the right side of the screen. */
+		/**
+		 * Movement to the right side of the screen.
+		 */
 		RIGHT,
-		/** Movement to the left side of the screen. */
+		/**
+		 * Movement to the left side of the screen.
+		 */
 		LEFT,
-		/** Movement to the bottom of the screen. */
+		/**
+		 * Movement to the bottom of the screen.
+		 */
 		DOWN
-	};
+	}
+
+	;
 
 	/**
 	 * Constructor, sets the initial conditions.
-	 * 
-	 * @param gameSettings
-	 *            Current game settings.
+	 *
+	 * @param gameSettings Current game settings.
 	 */
 	public EnemyShipFormation(final GameSettings gameSettings) {
 		this.drawManager = Core.getDrawManager();
@@ -126,6 +215,8 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 		this.movementSpeed = this.baseSpeed;
 		this.positionX = INIT_POS_X;
 		this.positionY = INIT_POS_Y;
+		this.rand = new Random();
+		this.val = rand.nextDouble();
 		this.shooters = new ArrayList<EnemyShip>();
 		SpriteType spriteType;
 
@@ -146,10 +237,10 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 				else
 					spriteType = SpriteType.EnemyShipA1;
 
-				column.add(new EnemyShip((SEPARATION_DISTANCE 
+				column.add(new EnemyShip((SEPARATION_DISTANCE
 						* this.enemyShips.indexOf(column))
-								+ positionX, (SEPARATION_DISTANCE * i)
-								+ positionY, spriteType));
+						+ positionX, (SEPARATION_DISTANCE * i)
+						+ positionY, spriteType));
 				this.shipCount++;
 			}
 		}
@@ -168,9 +259,8 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 
 	/**
 	 * Associates the formation to a given screen.
-	 * 
-	 * @param newScreen
-	 *            Screen to attach.
+	 *
+	 * @param newScreen Screen to attach.
 	 */
 	public final void attach(final Screen newScreen) {
 		screen = newScreen;
@@ -190,12 +280,12 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 	 * Updates the position of the ships.
 	 */
 	public final void update() {
-		if(this.shootingCooldown == null) {
+		if (this.shootingCooldown == null) {
 			this.shootingCooldown = Core.getVariableCooldown(shootingInterval,
 					shootingVariance);
 			this.shootingCooldown.reset();
 		}
-		
+
 		cleanUp();
 
 		int movementX = 0;
@@ -205,7 +295,7 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 		this.movementSpeed = (int) (Math.pow(remainingProportion, 2)
 				* this.baseSpeed);
 		this.movementSpeed += MINIMUM_SPEED;
-		
+
 		movementInterval++;
 		if (movementInterval >= this.movementSpeed) {
 			movementInterval = 0;
@@ -248,38 +338,52 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 					}
 			}
 
-			if (currentDirection == Direction.RIGHT)
-				movementX = X_SPEED;
-			else if (currentDirection == Direction.LEFT)
-				movementX = -X_SPEED;
-			else
+			if (currentDirection == Direction.RIGHT && val <= 0.05) {
+					currentDirection = Direction.LEFT;
+					movementX = -X_SPEED;
+					this.val = rand.nextDouble();
+				} else if (currentDirection == Direction.RIGHT && val > 0.05) {
+					movementX = X_SPEED;
+					this.val = rand.nextDouble();
+				}
+			 else if (currentDirection == Direction.LEFT && val <= 0.05 ) {
+					currentDirection = Direction.RIGHT;
+					this.val = rand.nextDouble();
+					movementX = X_SPEED;
+				} else if (currentDirection == Direction.LEFT && val > 0.05 ){
+					movementX = -X_SPEED;
+					this.val = rand.nextDouble();
+				}
+			 else
 				movementY = Y_SPEED;
-
-			positionX += movementX;
-			positionY += movementY;
-
-			// Cleans explosions.
-			List<EnemyShip> destroyed;
-			for (List<EnemyShip> column : this.enemyShips) {
-				destroyed = new ArrayList<EnemyShip>();
-				for (EnemyShip ship : column) {
-					if (ship != null && ship.isDestroyed()) {
-						destroyed.add(ship);
-						this.logger.info("Removed enemy "
-								+ column.indexOf(ship) + " from column "
-								+ this.enemyShips.indexOf(column));
-					}
-				}
-				column.removeAll(destroyed);
-			}
-
-			for (List<EnemyShip> column : this.enemyShips)
-				for (EnemyShip enemyShip : column) {
-					enemyShip.move(movementX, movementY);
-					enemyShip.update();
-				}
 		}
+
+		positionX += movementX;
+		positionY += movementY;
+
+		// Cleans explosions.
+		List<EnemyShip> destroyed;
+		for (List<EnemyShip> column : this.enemyShips) {
+			destroyed = new ArrayList<EnemyShip>();
+			for (EnemyShip ship : column) {
+				if (ship != null && ship.isDestroyed()) {
+					destroyed.add(ship);
+					this.logger.info("Removed enemy "
+							+ column.indexOf(ship) + " from column "
+							+ this.enemyShips.indexOf(column));
+				}
+			}
+			column.removeAll(destroyed);
+		}
+
+		for (List<EnemyShip> column : this.enemyShips)
+			for (EnemyShip enemyShip : column) {
+				enemyShip.move(movementX, movementY);
+				enemyShip.update();
+			}
 	}
+
+
 
 	/**
 	 * Cleans empty columns, adjusts the width and height of the formation.
